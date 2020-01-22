@@ -80,4 +80,14 @@ function initialise_processed_artifact(artifacts_toml::String, artifact_name::St
     return tree_hash
 end
 
+function initialise_processed_artifact(f::Function, args...)
+    tree_hash = initialise_processed_artifact(args...)
+
+    if tree_hash === nothing
+        return nothing
+    end
+
+    return f(tree_hash)
+end
+
 end # module
