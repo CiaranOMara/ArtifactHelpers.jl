@@ -1,0 +1,4 @@
+name = "ArtifactHelpers"
+uuid = "e0475575-a628-4ffc-9325-343306da1553"
+authors = ["Ciarán O'Mara <Ciaran.OMara@utas.edu.au>"]
+version = "0.1.0"
