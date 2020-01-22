@@ -6,7 +6,7 @@ using Pkg.PlatformEngines #Note: supplies unpack.
 
 using SHA
 
-export bind_download!, bind_processed!, setup_artifact
+export bind_download!, bind_processed!, initialise_processed_artifact
 
 
 function bind_download!(artifacts_toml::String, url::String, artifact_name::String=basename(url); lazy::Bool = true, force::Bool = false, packed::Bool=false)
@@ -38,32 +38,43 @@ function bind_download!(artifacts_toml::String, url::String, artifact_name::Stri
 
 end
 
-function bind_processed!(artifacts_toml::String, artifact_name::String, process::Function; force::Bool = false)
+function bind_processed!(artifacts_toml::String, artifact_name::String, process::Function, check_process_dependencies::Function = ()->(true); force::Bool = false)
 
-      # create_artifact() returns the content-hash of the artifact directory once we're finished creating it.
-      tree_hash = create_artifact(process)
+    check_process_dependencies()
 
-      #=
-      Now bind that hash within our `Artifacts.toml`.
-      `force = true` means that if it already exists, just overwrite with the new content-hash.
-      Unless the source files change, we do not expect the content hash to change, so this should not cause unnecessary version control churn.
-      =#
-      bind_artifact!(artifacts_toml, artifact_name, tree_hash, lazy = false, force = force)
+    # create_artifact() returns the content-hash of the artifact directory once we're finished creating it.
+    tree_hash = create_artifact(process)
 
-      return tree_hash
+    #=
+    Now bind that hash within our `Artifacts.toml`.
+    `force = true` means that if it already exists, just overwrite with the new content-hash.
+    Unless the source files change, we do not expect the content hash to change, so this should not cause unnecessary version control churn.
+    =#
+    bind_artifact!(artifacts_toml, artifact_name, tree_hash, lazy = false, force = force)
+
+    return tree_hash
 
 end
 
-function setup_artifact(artifacts_toml::String, artifact_name::String, process::Function)
+function initialise_processed_artifact(artifacts_toml::String, artifact_name::String, process::Function, check_process_dependencies::Function = ()->(true))
 
-    isfile(artifacts_toml) || error("Artifacts.toml does not exist!")
+    # Allow __init__ function to run when Artifacts.toml file does not exist.
+    if !isfile(artifacts_toml)
+        return nothing
+    end
 
-    # Query the `Artifacts.toml` file for the hash bound to the name (returns `nothing` if no such binding exists).
+    #
     tree_hash = artifact_hash(artifact_name, artifacts_toml)
 
-    if tree_hash == nothing || !artifact_exists(tree_hash)
-        @info "Creating artifact $(artifact_name)."
-        tree_hash = bind_processed!(artifacts_toml, artifact_name, process)
+    # Allow __init__ function to run when artifact not exist in Artifacts.toml.
+    if tree_hash == nothing
+        return nothing
+    end
+
+    # Setup the artifact if it does not exist on disk.
+    if !artifact_exists(tree_hash)
+        setup_hash = bind_processed!(artifacts_toml, artifact_name, process, check_process_dependencies)
+        setup_hash == tree_hash || error("Hash of setup artifact does not match.")
     end
 
     return tree_hash
