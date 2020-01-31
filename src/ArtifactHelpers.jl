@@ -9,36 +9,37 @@ using SHA
 export bind_download!, bind_processed!, initialise_processed_artifact
 
 
-function bind_download!(artifacts_toml::String, url::String, artifact_name::String=basename(url); lazy::Bool = true, force::Bool = false, packed::Bool=false)
+function bind_download!(artifacts_toml::String, url::String, artifact_name::String=basename(url); lazy::Bool = true, force::Bool = false, packed::Bool=false, platform::Union{Pkg.Types.Platform,Nothing} = nothing)
 
-   function acquire(path::AbstractString, io::IO)
-      download(url, path)
+    function acquire(path::AbstractString, io::IO)
+        download(url, path)
 
-      tarball_hash = open(path) do f
-         bytes2hex(sha2_256(f))
-      end
+        tarball_hash = open(path) do f
+            bytes2hex(sha2_256(f))
+        end
 
-      tree_hash = create_artifact() do path_artifact #Note: this will create an artifact that is ready for use.
-         if packed === true
-            unpack(path, path_artifact)
-         else
-            cp(path, joinpath(path_artifact, basename(url))) #Note: path is expected for cleanup.
-         end
-      end
+        tree_hash = create_artifact() do path_artifact #Note: this will create an artifact that is ready for use.
+            if packed === true
+                Pkg.PlatformEngines.probe_platform_engines!()
+                Pkg.PlatformEngines.unpack(path, path_artifact, verbose=true)
+            else
+                cp(path, joinpath(path_artifact, basename(url))) #Note: path is expected for cleanup.
+            end
+        end
 
-      return tree_hash, tarball_hash
-   end
+        return tree_hash, tarball_hash
+    end
 
-   # Acquire artifact.
-   (tree_hash, tarball_hash) = mktemp(acquire)
+    # Acquire artifact.
+    (tree_hash, tarball_hash) = mktemp(acquire)
 
-   bind_artifact!(artifacts_toml, artifact_name, tree_hash, download_info=[(url,tarball_hash)], lazy=lazy, force=force)
+    bind_artifact!(artifacts_toml, artifact_name, tree_hash, download_info=[(url,tarball_hash)], lazy=lazy, force=force, platform=platform)
 
-   return tree_hash
+    return tree_hash
 
 end
 
-function bind_processed!(artifacts_toml::String, artifact_name::String, process::Function, check_process_dependencies::Function = ()->(true); force::Bool = false)
+function bind_processed!(artifacts_toml::String, artifact_name::String, process::Function, check_process_dependencies::Function = ()->(true); force::Bool = false, platform::Union{Pkg.Types.Platform,Nothing} = nothing)
 
     check_process_dependencies()
 
@@ -50,7 +51,7 @@ function bind_processed!(artifacts_toml::String, artifact_name::String, process:
     `force = true` means that if it already exists, just overwrite with the new content-hash.
     Unless the source files change, we do not expect the content hash to change, so this should not cause unnecessary version control churn.
     =#
-    bind_artifact!(artifacts_toml, artifact_name, tree_hash, lazy = false, force = force)
+    bind_artifact!(artifacts_toml, artifact_name, tree_hash, lazy = false, force = force, platform=platform)
 
     return tree_hash
 
