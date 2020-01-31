@@ -6,3 +6,4 @@ version = "0.1.1"
 [deps]
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"

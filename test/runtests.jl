@@ -11,6 +11,10 @@ using ArtifactHelpers
         #TODO: host or find reasonable download.
     end
 
+    @testset "File - .zip" begin
+        #TODO: host or find reasonable download.
+    end
+
     @testset "File - .tar.gz" begin
         #TODO: host or find reasonable download.
 
