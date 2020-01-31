@@ -55,23 +55,25 @@ function unzip(src, dest; verbose::Bool = false)
         error("Destination does not exist.")
     end
 
-    r = ZipFile.Reader(src) #TODO: wrap in try catch.
+    r = ZipFile.Reader(src)
 
-    for f in r.files
+    try
+        for f in r.files
 
-        verbose && (println("Filename: $(f.name)"))
+            verbose && (println("Filename: $(f.name)"))
 
-        if f.method == 0
-            mkpath(joinpath(dest, f.name))
+            if f.method == 0
+                mkpath(joinpath(dest, f.name))
+            end
+
+            if f.method == 8
+                write(joinpath(dest, f.name), read(f))
+            end
+
         end
-
-        if f.method == 8
-            write(joinpath(dest, f.name), read(f))
-        end
-
+    finally
+        close(r)
     end
-
-    close(r)
 
     return dest
 end
