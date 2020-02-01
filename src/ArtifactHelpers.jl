@@ -226,7 +226,7 @@ function setup(artifact_name, artifacts_toml; verbose::Bool = false)
 end
 
 function setup(process::Function)
-    return (artifacts_toml, artifact_name, verbose = verbose) -> create_artifact(process)
+    return (artifacts_toml, artifact_name; verbose::Bool = false) -> create_artifact(process)
 end
 
 function initialise_artifact(artifacts_toml::String, artifact_name::String, setup_func::Function = setup; verbose::Bool = false)
