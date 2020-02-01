@@ -226,7 +226,7 @@ function setup(artifact_name, artifacts_toml; verbose::Bool = false)
 end
 
 function setup(process::Function)
-    return (artifacts_toml, artifact_name; verbose::Bool = false) -> create_artifact(process)
+    return (artifact_name, artifacts_toml; verbose::Bool = false) -> create_artifact(process)
 end
 
 function initialise_artifact(artifacts_toml::String, artifact_name::String, setup_func::Function = setup; verbose::Bool = false)
@@ -246,7 +246,7 @@ function initialise_artifact(artifacts_toml::String, artifact_name::String, setu
 
     # Setup the artifact if it does not exist on disk.
     if !artifact_exists(tree_hash)
-        setup_hash = setup_func(artifacts_toml, artifact_name, verbose = verbose)
+        setup_hash = setup_func(artifact_name, artifacts_toml, verbose = verbose)
         setup_hash == tree_hash || error("Hash $setup_hash of setup artifact does not match artifact's record.")
     end
 
