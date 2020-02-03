@@ -55,6 +55,8 @@ function unzip(src, dest; verbose::Bool = false)
         error("Destination does not exist.")
     end
 
+    verbose && @info "Unzipping." src dest
+
     r = ZipFile.Reader(src)
 
     try
@@ -233,21 +235,23 @@ function initialise_artifact(artifacts_toml::String, artifact_name::String, setu
 
     # Allow __init__ function to run when Artifacts.toml file does not exist.
     if !isfile(artifacts_toml)
+        @warn "Artifacts.toml does not exist at specified path." artifacts_toml
         return nothing
     end
 
-    #
+    # Obtain artifact's recorded hash.
     tree_hash = artifact_hash(artifact_name, artifacts_toml)
 
     # Allow __init__ function to run when the artifact entry does not exist in Artifacts.toml.
     if tree_hash == nothing
+        @warn "An artifact entry for \"$artifact_name\" does not exist in Artifacts.toml."
         return nothing
     end
 
     # Setup the artifact if it does not exist on disk.
     if !artifact_exists(tree_hash)
         setup_hash = setup_func(artifact_name, artifacts_toml, verbose = verbose)
-        setup_hash == tree_hash || error("Hash $setup_hash of setup artifact does not match artifact's record.")
+        setup_hash == tree_hash || error("Hash $setup_hash of setup artifact does not match the entry for \"$artifact_name\".")
     end
 
     return tree_hash
