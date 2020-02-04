@@ -1,19 +1,22 @@
 # ArtifactHelpers.jl
 
-> This package is still very much a work in progress. I haven't settled on a pattern and am very much open to suggestions and improvements.
+This package contains a set of helper functions that overlay Julia's Artifact framework to assist with binding, initialisation, and possible recreation of Artifacts.
 
-This package contains a set of helper functions that overlay Julia's Artifact framework to assist with binding and initialisation of Artifacts.
+> This package is still very much a work in progress.
+I haven't settled on a pattern and am very much open to suggestions and improvements.
 
-I have found that there are two stages of Artifact creation: the initial binding and then the repeatable use across systems.
+## Installation
+    (v1.1) pkg> add https://github.com/CiaranOMara/ArtifactHelpers.jl
 
 ## Usage Example
+I have found that there are two stages of Artifact creation outside of the BinaryWrapper paradigm: the initial binding and then the _recreation_ and use across systems.
 
+
+This example shows a usage pattern of `ArtifactHelpers` within a project.
 ```
 # Project layout.
 ./
 ├── Artifacts.toml
-├── LICENSE
-├── Manifest.toml
 ├── Project.toml
 ├── README.md
 ├── generate_artifacts.jl
@@ -21,7 +24,8 @@ I have found that there are two stages of Artifact creation: the initial binding
     └── <package_name>.jl
 ```
 
-Initial binding of Artifacts carried out in `./generate_artifacts.jl`.
+The contents of the `./generate_artifacts.jl` file performs the initial binding of Artifacts to the `Artifacts.toml` file, which is committed to the git history once populated.
+An example of the initial binding with `ArtifactHelpers` is shown below.
 ```julia
 using Pkg
 Pkg.activate(@__DIR__)
@@ -31,15 +35,16 @@ using ArtifactHelpers
 
 artifacts_toml = touch(joinpath(@__DIR__, "Artifacts.toml"))
 
-bind_packed_download!(artifacts_toml, "http://somwhere/random.tar.gz", force = true, verbose = true)
-bind_download!(artifacts_toml, "http://somwhere/random.csv", force = true, verbose = true)
-bind_download!(artifacts_toml, "http://somwhere/random.zip", force = true, verbose = true)
+bind_artifact!(artifacts_toml, File("http://somwhere/random.csv"), force = true, verbose = true)
+bind_artifact!(artifacts_toml, Zip("http://somwhere/random.zip"), force = true, verbose = true)
+bind_artifact!(artifacts_toml, GZ("http://somwhere/random.tar.gz"), force = true, verbose = true)
 
 using <package_name>
-bind_processed!(artifacts_toml, "processed", <package_name>.process, force=true)
+bind_artifact!(artifacts_toml, Processed("Processed"), <package_name>.process, force = true, verbose = true)
 ```
 
-The recreation/reuse of Artifacts in `./src/<package_name>.jl` (main package entry).
+Once the `Artifacts.toml` file is populated, `ArtifactHelpers` may be used to initialise and possibly recreate Artifacts within modules or scripts.
+Below is an example of Artifact initialisation within `./src/<package_name>.jl`.
 ```julia
 module <package_name>
 
@@ -67,15 +72,22 @@ function __init__()
         global path_random_zip = abspath(artifact_path(tree_hash)
     end
 
-    initialise_artifact(artifacts_toml, "processed", setup(process), verbose = true) do tree_hash
+    initialise_artifact(artifacts_toml, "processed", process, verbose = true) do tree_hash
         global path_processed = abspath(artifact_path(tree_hash))
     end
 
 end
 
-function process(path_artifact::String)
-    # Do stuff.
+function process(entry::Processed; force::Bool = false, verbose::Bool = false)
+
+    tree_hash = create_artifact() do path_artifact #Note: this will create an artifact that is ready for use.
+        # Do stuff.
+    end
+
+    return tree_hash
 end
+
+# module code ...
 
 end # module
 
