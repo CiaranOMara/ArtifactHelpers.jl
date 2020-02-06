@@ -401,12 +401,14 @@ function unzip(src, dest; verbose::Bool = false)
 
             verbose && (println("Filename: $(f.name)"))
 
-            if f.method == 0
+            if f.method == ZipFile.Store
                 mkpath(joinpath(dest, f.name))
             end
 
-            if f.method == 8
-                write(joinpath(dest, f.name), read(f))
+            if f.method == ZipFile.Deflate
+                path = joinpath(dest, f.name)
+                mkpath(dirname(path))
+                !isdirpath(f.name) && write(path, read(f))
             end
 
         end
