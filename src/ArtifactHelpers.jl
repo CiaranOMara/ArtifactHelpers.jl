@@ -11,13 +11,12 @@ using ZipFile
 using SHA
 
 export
-    File, GZ, Zip, Processed,
+    File, AutoDownloadable, Zip, Processed,
     initialise_artifact, setup
 
 abstract type Entry end
-abstract type AutoDownloadableEntry <: Entry end
+abstract type DownloadableEntry <: Entry end
 abstract type CustomEntry <: Entry end
-abstract type CustomDownloadableEntry <: CustomEntry end
 
 function _url(url::String)
     return [url]
@@ -27,7 +26,7 @@ function _url(urls::Vector{String})
     return urls
 end
 
-mutable struct GZ <: AutoDownloadableEntry
+mutable struct AutoDownloadableEntry <: DownloadableEntry
     artifact_name::String
     meta::Dict{String,Any}
     urls::Vector{String}
@@ -35,12 +34,14 @@ mutable struct GZ <: AutoDownloadableEntry
     lazy::Bool
     new_download_info::Vector{Tuple}
 
-    GZ(url; platform = nothing, lazy = true) = new(basename(first(_url(url))), Dict(), _url(url), platform, lazy, Vector{Tuple}())
-    GZ(artifact_name, url; platform = nothing, lazy = true) = new(artifact_name, Dict(), _url(url), platform, lazy, Vector{Tuple}())
-    GZ(artifact_name, dict::Dict; platform = nothing, lazy = true) = new(artifact_name, dict, Vector{String}(), platform, lazy, Vector{Tuple}())
+    AutoDownloadableEntry(url; platform = nothing, lazy = true) = new(basename(first(_url(url))), Dict(), _url(url), platform, lazy, Vector{Tuple}())
+    AutoDownloadableEntry(artifact_name, url; platform = nothing, lazy = true) = new(artifact_name, Dict(), _url(url), platform, lazy, Vector{Tuple}())
+    AutoDownloadableEntry(artifact_name, dict::Dict; platform = nothing, lazy = true) = new(artifact_name, dict, Vector{String}(), platform, lazy, Vector{Tuple}())
 end
 
-mutable struct File <: CustomDownloadableEntry
+const AutoDownloadable = AutoDownloadableEntry
+
+mutable struct File <: DownloadableEntry
     artifact_name::String
     meta::Dict{String,Any}
     platform::Union{Platform,Nothing}
@@ -50,7 +51,7 @@ mutable struct File <: CustomDownloadableEntry
     File(artifact_name, dict::Dict; platform = nothing) = new(artifact_name, dict, platform)
 end
 
-mutable struct Zip <: CustomDownloadableEntry
+mutable struct Zip <: DownloadableEntry
     artifact_name::String
     meta::Dict{String,Any}
     platform::Union{Platform,Nothing}
@@ -103,7 +104,7 @@ function verifiable(entry::Entry)
 end
 
 
-function record!(artifacts_toml::AbstractString, entry::CustomEntry)
+function record!(artifacts_toml::AbstractString, entry::Entry) #TODO: this actually captures custom toml entries.
 
     isfile(artifacts_toml) || error("Artifacts.toml does not exist at specified path:", artifacts_toml)
 
@@ -127,7 +128,7 @@ function record!(artifacts_toml::AbstractString, entry::CustomEntry)
     return nothing
 end
 
-function record!(artifacts_toml::AbstractString, entry::Entry)
+function record!(artifacts_toml::AbstractString, entry::AutoDownloadableEntry)
     return nothing
 end
 
@@ -200,7 +201,7 @@ function acquire!(entry::AutoDownloadableEntry, dest::AbstractString = pwd(); fo
     return entry
 end
 
-function acquire!(entry::CustomDownloadableEntry, dest::AbstractString = pwd(); force::Bool = false, verbose::Bool = false)
+function acquire!(entry::DownloadableEntry, dest::AbstractString = pwd(); force::Bool = false, verbose::Bool = false)
 
     Pkg.PlatformEngines.probe_platform_engines!()
     Pkg.PlatformEngines.download(get(entry, "url"), dest, verbose = verbose)
@@ -221,7 +222,7 @@ function acquire!(entry::CustomDownloadableEntry, dest::AbstractString = pwd(); 
     return entry
 end
 
-function process(entry::GZ; force::Bool = false, verbose::Bool = false)
+function process(entry::AutoDownloadableEntry; force::Bool = false, verbose::Bool = false)
 
     tree_hash = create_artifact() do path_artifact #Note: this will create an artifact that is ready for use.
 
@@ -279,7 +280,7 @@ end
 #
 # end
 
-function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::GZ, process_func::Function = process; force::Bool = false, verbose::Bool = false)
+function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::AutoDownloadableEntry, process_func::Function = process; force::Bool = false, verbose::Bool = false)
 
     # bind_artifact!(artifacts_toml::String, name::String, hash::SHA1; platform::Union{Platform,Nothing} = nothing, download_info::Union{Vector{<:Tuple},Nothing} = nothing, lazy::Bool = false, force::Bool = false)
 
@@ -315,7 +316,7 @@ function setup(artifact_name, artifacts_toml)
     meta = artifact_meta(artifact_name, artifacts_toml) #TODO: platform.
 
     if haskey(meta, "download")
-        return GZ(artifact_name, meta)
+        return AutoDownloadableEntry(artifact_name, meta)
     end
 
     if haskey(meta, "url") && haszipext(meta["url"])

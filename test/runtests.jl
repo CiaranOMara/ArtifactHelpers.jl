@@ -26,7 +26,7 @@ using ArtifactHelpers
 
         @test_nowarn bind_artifact!(artifacts_toml, Zip("http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip"), force = true, verbose = false) #TODO: host or find reasonable download.
 
-        @test_nowarn bind_artifact!(artifacts_toml, GZ("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/chromAgp.tar.gz"), force = true, verbose = false)#TODO: host or find reasonable download.
+        @test_nowarn bind_artifact!(artifacts_toml, AutoDownloadable("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/chromAgp.tar.gz"), force = true, verbose = false)#TODO: host or find reasonable download.
 
         @test_nowarn bind_artifact!(artifacts_toml, Processed("Processed"), test_process, force = true, verbose = false)
 

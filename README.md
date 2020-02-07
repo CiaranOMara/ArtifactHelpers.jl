@@ -37,7 +37,7 @@ artifacts_toml = touch(joinpath(@__DIR__, "Artifacts.toml"))
 
 bind_artifact!(artifacts_toml, File("http://somwhere/random.csv"), force = true, verbose = true)
 bind_artifact!(artifacts_toml, Zip("http://somwhere/random.zip"), force = true, verbose = true)
-bind_artifact!(artifacts_toml, GZ("http://somwhere/random.tar.gz"), force = true, verbose = true)
+bind_artifact!(artifacts_toml, AutoDownloadable("http://somwhere/random.tar.gz"), force = true, verbose = true)
 
 using <package_name>
 bind_artifact!(artifacts_toml, Processed("Processed"), <package_name>.process, force = true, verbose = true)
