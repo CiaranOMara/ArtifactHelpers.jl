@@ -21,6 +21,21 @@ using ArtifactHelpers
         return tree_hash
     end
 
+    @testset "Helpers" begin
+        @test ArtifactHelpers.isurl("http") == true
+        @test ArtifactHelpers.isurl("https") == true
+        @test ArtifactHelpers.isurl("https://") == true
+        @test ArtifactHelpers.isurl("htt") == false
+
+
+
+        #Check setindex!.
+        entry = Processed("test")
+        change = setindex!(entry, "test", "test")
+        @test ArtifactHelpers.metadata(entry) == change
+
+    end #testset "Helpers"
+
     @testset "Binding" begin
         @test_nowarn bind_artifact!(artifacts_toml, File("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes"), force = true, verbose = false)#TODO: host or find reasonable download.
 
