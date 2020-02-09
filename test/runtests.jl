@@ -45,6 +45,10 @@ using ArtifactHelpers
 
         @test_nowarn build_artifact!(artifacts_toml, Processed("Processed"), test_process, force = true, verbose = false)
 
+        @test_nowarn build_artifact!(artifacts_toml, Processed("ProcessedDo"), force = true, verbose = false) do path_artifact
+            write(joinpath(path_artifact, "test.txt"), "test")
+        end
+
     end #testset "Binding"
 
     @testset "Initialise with artifacts present" begin
