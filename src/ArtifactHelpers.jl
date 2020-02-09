@@ -407,6 +407,20 @@ function build_artifact!(artifacts_toml::String, str::String, process_func::Func
     return build_artifact!(artifacts_toml, setup(str), process_func; kwargs...)
 end
 
+function build_artifact!(kernel::Function, artifacts_toml::String, entry; kwargs...)
+
+    function wrapped_kernel(entry::Entry; kwargs...) #Note: kwargs captures and diffuses.
+
+        tree_hash = create_artifact() do path_artifact #Note: this will create an artifact that is ready for use.
+            kernel(path_artifact)
+        end
+
+        return tree_hash
+    end
+
+    return build_artifact!(artifacts_toml, entry, wrapped_kernel; kwargs...)
+end
+
 function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::AutoDownloadableEntry, tree_hash::SHA1; force::Bool = false, verbose::Bool = false)
 
     # bind_artifact!(artifacts_toml::String, name::String, hash::SHA1; platform::Union{Platform,Nothing} = nothing, download_info::Union{Vector{<:Tuple},Nothing} = nothing, lazy::Bool = false, force::Bool = false)
