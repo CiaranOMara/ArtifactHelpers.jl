@@ -21,14 +21,29 @@ using ArtifactHelpers
         return tree_hash
     end
 
-    @testset "Binding" begin
-        @test_nowarn bind_artifact!(artifacts_toml, File("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes"), force = true, verbose = false)#TODO: host or find reasonable download.
+    @testset "Helpers" begin
+        @test ArtifactHelpers.isurl("http") == true
+        @test ArtifactHelpers.isurl("https") == true
+        @test ArtifactHelpers.isurl("https://") == true
+        @test ArtifactHelpers.isurl("htt") == false
 
-        @test_nowarn bind_artifact!(artifacts_toml, Zip("http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip"), force = true, verbose = false) #TODO: host or find reasonable download.
 
-        @test_nowarn bind_artifact!(artifacts_toml, GZ("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/chromAgp.tar.gz"), force = true, verbose = false)#TODO: host or find reasonable download.
 
-        @test_nowarn bind_artifact!(artifacts_toml, Processed("Processed"), test_process, force = true, verbose = false)
+        #Check setindex!.
+        entry = Processed("test")
+        change = setindex!(entry, "test", "test")
+        @test ArtifactHelpers.metadata(entry) == change
+
+    end #testset "Helpers"
+
+    @testset "Building" begin
+        @test_nowarn build_artifact!(artifacts_toml, File("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes"), force = true, verbose = false)#TODO: host or find reasonable download.
+
+        @test_nowarn build_artifact!(artifacts_toml, Zip("http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip"), force = true, verbose = false) #TODO: host or find reasonable download.
+
+        @test_nowarn build_artifact!(artifacts_toml, AutoDownloadable("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/chromAgp.tar.gz"), force = true, verbose = false)#TODO: host or find reasonable download.
+
+        @test_nowarn build_artifact!(artifacts_toml, Processed("Processed"), test_process, force = true, verbose = false)
 
     end #testset "Binding"
 
