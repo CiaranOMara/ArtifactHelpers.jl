@@ -382,7 +382,7 @@ function build_artifact!(artifacts_toml::String, entry::Entry, process_func::Fun
         bind_artifact!(artifacts_toml, entry, tree_hash; force = force, verbose = verbose)
 
         @info "Built $artifact_name." tree_hash
-
+        return tree_hash
     end
 
     # Setup the artifact if it does not exist on disk.
@@ -394,7 +394,7 @@ function build_artifact!(artifacts_toml::String, entry::Entry, process_func::Fun
         setup_hash == tree_hash || error("Hash $setup_hash of setup artifact does not match the entry for \"$artifact_name\".")
 
         @info "Rebuilt $artifact_name." tree_hash
-
+        return tree_hash
     end
 
     @info "Skipped build of $artifact_name." tree_hash
