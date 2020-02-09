@@ -10,9 +10,11 @@ using ZipFile
 
 using SHA
 
+import Base: SHA1
+
 export
     File, AutoDownloadable, Zip, Processed,
-    initialise_artifact, setup
+    build_artifact!, initialise_artifact, setup
 
 const AUTODOWNLOADABLES = [".gz"]
 
@@ -346,7 +348,6 @@ function record!(artifacts_toml::AbstractString, entry::AutoDownloadableEntry)
     return nothing
 end
 
-
 function process(entry::DownloadableEntry; force::Bool = false, verbose::Bool = false)
 
     tree_hash = create_artifact() do path_artifact #Note: this will create an artifact that is ready for use.
@@ -363,11 +364,52 @@ function process(entry::DownloadableEntry; force::Bool = false, verbose::Bool = 
     return tree_hash
 end
 
-function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::AutoDownloadableEntry, process_func::Function = process; force::Bool = false, verbose::Bool = false)
+function build_artifact!(artifacts_toml::String, entry::Entry, process_func::Function = process; force::Bool = false, verbose::Bool = false)
+
+    if !isfile(artifacts_toml)
+        error("Artifacts.toml does not exist at specified path: ", artifacts_toml)
+    end
+
+    artifact_name = name(entry)
+
+    # Obtain artifact's recorded hash.
+    tree_hash = artifact_hash(artifact_name, artifacts_toml)
+
+    if tree_hash == nothing
+        @warn "Building and binding a new artifact." artifact_name
+        tree_hash = process_func(entry, force = force, verbose = verbose)
+
+        bind_artifact!(artifacts_toml, entry, tree_hash; force = force, verbose = verbose)
+
+        @info "Built $artifact_name." tree_hash
+
+    end
+
+    # Setup the artifact if it does not exist on disk.
+    if !artifact_exists(tree_hash)
+        @warn "Rebuilding artifact." artifact_name
+
+        # setup_hash = setup_func(artifact_name, artifacts_toml, verbose = verbose)
+        setup_hash = process_func(entry, force = force, verbose = verbose) #Note: not forcing during initialisation.
+        setup_hash == tree_hash || error("Hash $setup_hash of setup artifact does not match the entry for \"$artifact_name\".")
+
+        @info "Rebuilt $artifact_name." tree_hash
+
+    end
+
+    @info "Skipped build of $artifact_name." tree_hash
+
+    return tree_hash
+
+end
+
+function build_artifact!(artifacts_toml::String, str::String, process_func::Function = process; kwargs...)
+    return build_artifact!(artifacts_toml, setup(str), process_func; kwargs...)
+end
+
+function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::AutoDownloadableEntry, tree_hash::SHA1; force::Bool = false, verbose::Bool = false)
 
     # bind_artifact!(artifacts_toml::String, name::String, hash::SHA1; platform::Union{Platform,Nothing} = nothing, download_info::Union{Vector{<:Tuple},Nothing} = nothing, lazy::Bool = false, force::Bool = false)
-
-    tree_hash = process_func(entry, force = force, verbose = verbose)
 
     download_info = entry.new_download_info #TODO: merge with existing download_info?
 
@@ -378,11 +420,9 @@ function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::Aut
 
 end
 
-function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::Entry, process_func::Function = process; force::Bool = false, verbose::Bool = false)
+function Pkg.Artifacts.bind_artifact!(artifacts_toml::AbstractString, entry::Entry, tree_hash::SHA1; force::Bool = false, verbose::Bool = false)
 
     # bind_artifact!(artifacts_toml::String, name::String, hash::SHA1; platform::Union{Platform,Nothing} = nothing, download_info::Union{Vector{<:Tuple},Nothing} = nothing, lazy::Bool = false, force::Bool = false)
-
-    tree_hash = process_func(entry, force = force, verbose = verbose)
 
     # Bind acquired artifact.
     bind_artifact!(artifacts_toml, name(entry), tree_hash, force = force, lazy = false, platform = entry.platform)
