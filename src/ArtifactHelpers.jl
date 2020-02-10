@@ -375,13 +375,25 @@ function build_artifact!(artifacts_toml::String, entry::Entry, process_func::Fun
     # Obtain artifact's recorded hash.
     tree_hash = artifact_hash(artifact_name, artifacts_toml)
 
-    if tree_hash == nothing
+    if tree_hash === nothing
         @warn "Building and binding a new artifact." artifact_name
+
+        tree_hash = process_func(entry, verbose = verbose)
+
+        bind_artifact!(artifacts_toml, entry, tree_hash; verbose = verbose)
+
+        @info "Built $artifact_name." tree_hash
+        return tree_hash
+    end
+
+    if force === true
+        @warn "Forcefully rebuilding artifact." artifact_name
+
         tree_hash = process_func(entry, force = force, verbose = verbose)
 
         bind_artifact!(artifacts_toml, entry, tree_hash; force = force, verbose = verbose)
 
-        @info "Built $artifact_name." tree_hash
+        @info "Forcefully built $artifact_name." tree_hash
         return tree_hash
     end
 
@@ -389,8 +401,7 @@ function build_artifact!(artifacts_toml::String, entry::Entry, process_func::Fun
     if !artifact_exists(tree_hash)
         @warn "Rebuilding artifact." artifact_name
 
-        # setup_hash = setup_func(artifact_name, artifacts_toml, verbose = verbose)
-        setup_hash = process_func(entry, force = force, verbose = verbose) #Note: not forcing during initialisation.
+        setup_hash = process_func(entry, verbose = verbose) #Note: not forcing during initialisation.
         setup_hash == tree_hash || error("Hash $setup_hash of setup artifact does not match the entry for \"$artifact_name\".")
 
         @info "Rebuilt $artifact_name." tree_hash
