@@ -1,9 +1,15 @@
 # ArtifactHelpers.jl
 
-This package contains a set of helper functions that overlay Julia's Artifact framework to assist with binding, initialisation, and possible recreation of Artifacts.
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Unit Tests - Unix/Linux](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions/workflows/ci-tests.yml/badge.svg?branch=master)](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions/workflows/ci-tests.yml)
+[![Unit Tests - Windows](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions/workflows/ci-tests-windows.yml/badge.svg?branch=master)](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions/workflows/ci-tests-windows.yml)
 
-> This package is still very much a work in progress.
-I haven't settled on a pattern and am very much open to suggestions and improvements.
+> This project follows the [semver](http://semver.org) pro forma and uses the [git-flow branching model](http://nvie.com/git-model "original
+blog post").
+
+## Overview
+
+The `ArtifactHelpers` package provides a set of helper functions that overlay Julia's Artifact framework to assist with binding, initialisation, and possible recreation of Artifacts.
 
 ## Installation
     (v1.1) pkg> add https://github.com/CiaranOMara/ArtifactHelpers.jl
@@ -34,13 +40,13 @@ Shown below is an example of a `deps/build.jl` file that performs the initial bi
 ```julia
 using ArtifactHelpers
 
-artifacts_toml = joinpath(@__DIR__, "Artifacts.toml")
+artifacts_toml = joinpath(@__DIR__, "..", "Artifacts.toml")
 
-bind_artifact!(artifacts_toml, File("http://somwhere/random.csv"), force = true, verbose = true)
-bind_artifact!(artifacts_toml, Zip("http://somwhere/random.zip"), force = true, verbose = true)
-bind_artifact!(artifacts_toml, AutoDownloadable("http://somwhere/random.tar.gz"), force = true, verbose = true)
+bind_artifact!(artifacts_toml, File("http://somwhere/random.csv"), force = false, verbose = true)
+bind_artifact!(artifacts_toml, Zip("http://somwhere/random.zip"), force = false, verbose = true)
+bind_artifact!(artifacts_toml, AutoDownloadable("http://somwhere/random.tar.gz"), force = false, verbose = true)
 
-bind_artifact!(artifacts_toml, "Processed", force = true, verbose = true) do path_artifact #Note: this will create an artifact that is ready for use.
+bind_artifact!(artifacts_toml, "Processed", force = false, verbose = true) do path_artifact #Note: this will create an artifact that is ready for use.
     # Do stuff ...
 end
 ```
@@ -76,3 +82,11 @@ end
 end # module
 
 ```
+
+## Contributions
+> This package is still very much a work in progress.
+I haven't settled on a pattern and am very much open to suggestions and improvements.
+
+## Acknowledgements
+- [Original blog post](https://julialang.org/blog/2019/11/artifacts/) by Elliot Saba, Stefan Karpinski, Kristoffer Carlsson
+- [The latest docs of Pkg.jl](https://julialang.github.io/Pkg.jl/dev/artifacts/)
