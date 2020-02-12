@@ -1,9 +1,14 @@
 # ArtifactHelpers.jl
 
-This package contains a set of helper functions that overlay Julia's Artifact framework to assist with binding, initialisation, and possible recreation of Artifacts.
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Run tests](https://github.com/CiaranOMara/ArtifactHelpers.jl/workflows/Run%20tests/badge.svg)](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions?query=workflow%3A%22Run+tests%22)
 
-> This package is still very much a work in progress.
-I haven't settled on a pattern and am very much open to suggestions and improvements.
+> This project follows the [semver](http://semver.org) pro forma and uses the [git-flow branching model](http://nvie.com/git-model "original
+blog post").
+
+## Overview
+
+The `ArtifactHelpers` package provides a set of helper functions that overlay Julia's Artifact framework to assist with binding, initialisation, and possible recreation of Artifacts.
 
 ## Installation
     (v1.1) pkg> add https://github.com/CiaranOMara/ArtifactHelpers.jl
@@ -76,3 +81,11 @@ end
 end # module
 
 ```
+
+## Contributions
+> This package is still very much a work in progress.
+I haven't settled on a pattern and am very much open to suggestions and improvements.
+
+## Acknowledgements
+- [Original blog post](https://julialang.org/blog/2019/11/artifacts/) by Elliot Saba, Stefan Karpinski, Kristoffer Carlsson
+- [The latest docs of Pkg.jl](https://julialang.github.io/Pkg.jl/dev/artifacts/)
