@@ -40,7 +40,7 @@ Shown below is an example of a `deps/build.jl` file that performs the initial bi
 ```julia
 using ArtifactHelpers
 
-artifacts_toml = joinpath(@__DIR__, "Artifacts.toml")
+artifacts_toml = joinpath(@__DIR__, "..", "Artifacts.toml")
 
 bind_artifact!(artifacts_toml, File("http://somwhere/random.csv"), force = true, verbose = true)
 bind_artifact!(artifacts_toml, Zip("http://somwhere/random.zip"), force = true, verbose = true)
