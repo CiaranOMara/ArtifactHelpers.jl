@@ -42,11 +42,11 @@ using ArtifactHelpers
 
 artifacts_toml = joinpath(@__DIR__, "..", "Artifacts.toml")
 
-bind_artifact!(artifacts_toml, File("http://somwhere/random.csv"), force = true, verbose = true)
-bind_artifact!(artifacts_toml, Zip("http://somwhere/random.zip"), force = true, verbose = true)
-bind_artifact!(artifacts_toml, AutoDownloadable("http://somwhere/random.tar.gz"), force = true, verbose = true)
+bind_artifact!(artifacts_toml, File("http://somwhere/random.csv"), force = false, verbose = true)
+bind_artifact!(artifacts_toml, Zip("http://somwhere/random.zip"), force = false, verbose = true)
+bind_artifact!(artifacts_toml, AutoDownloadable("http://somwhere/random.tar.gz"), force = false, verbose = true)
 
-bind_artifact!(artifacts_toml, "Processed", force = true, verbose = true) do path_artifact #Note: this will create an artifact that is ready for use.
+bind_artifact!(artifacts_toml, "Processed", force = false, verbose = true) do path_artifact #Note: this will create an artifact that is ready for use.
     # Do stuff ...
 end
 ```
