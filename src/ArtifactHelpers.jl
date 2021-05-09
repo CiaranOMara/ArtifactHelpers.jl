@@ -6,6 +6,8 @@ using Pkg.PlatformEngines #Note: supplies unpack.
 
 using Pkg.BinaryPlatforms
 
+using Downloads
+
 using ZipFile
 
 using SHA
@@ -193,12 +195,12 @@ end
 
 function _download(url::AbstractString, dest::AbstractString; verbose::Bool = false)
     Pkg.PlatformEngines.probe_platform_engines!()
-    return Pkg.PlatformEngines.download(url, dest, verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
+    return Downloads.download(url, dest, verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
 end
 
 function _download(url::AbstractString, dest::AbstractString, tarball_hash; verbose::Bool = false)
     Pkg.PlatformEngines.probe_platform_engines!()
-    downloaded = Pkg.PlatformEngines.download(url, dest, verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
+    downloaded = Downloads.download(url, dest, verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
 
     result = Pkg.PlatformEngines.verify(dest, tarball_hash, verbose = verbose)
 
