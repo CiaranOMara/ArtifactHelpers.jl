@@ -27,8 +27,6 @@ using ArtifactHelpers
         @test ArtifactHelpers.isurl("https://") == true
         @test ArtifactHelpers.isurl("htt") == false
 
-
-
         #Check setindex!.
         entry = Processed("test")
         change = setindex!(entry, "test", "test")
@@ -60,8 +58,6 @@ using ArtifactHelpers
         @test initialise_artifact(artifacts_toml, "chromAgp.tar.gz") == artifact_hash("chromAgp.tar.gz", artifacts_toml)
 
         @test initialise_artifact(artifacts_toml, "Processed", test_process) == artifact_hash("Processed", artifacts_toml)
-
-
 
     end #testest "Initialise with artifacts present"
 
