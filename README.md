@@ -1,8 +1,7 @@
 # ArtifactHelpers.jl
 
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Run tests Unix/Linux](https://github.com/CiaranOMara/ArtifactHelpers.jl/workflows/Run%20tests%20Unix/Linux/badge.svg)](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions?query=workflow%3A%22Run+tests%20Unix/Linux%22)
-[![Run tests Windows](https://github.com/CiaranOMara/ArtifactHelpers.jl/workflows/Run%20tests%20Windows/badge.svg)](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions?query=workflow%3A%22Run%20tests%20Windows%22)
+[![Unit Tests](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions/workflows/ci-tests.yml/badge.svg?branch=master)](https://github.com/CiaranOMara/ArtifactHelpers.jl/actions/workflows/ci-tests.yml)
 
 > This project follows the [semver](http://semver.org) pro forma and uses the [git-flow branching model](http://nvie.com/git-model "original
 blog post").

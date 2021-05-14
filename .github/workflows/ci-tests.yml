@@ -1,23 +1,38 @@
-name: Run tests Unix/Linux
+name: Unit Tests
 
-on: [push, pull_request]
+on:
+  - push
+  - pull_request
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        julia-version: ['1.3.1']
+        julia-version:
+          - '1.3.1' # minimum requirement
+          - '1'
         julia-arch: [x64, x86]
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        experimental: [false]
+        include:
+          - julia-version: nightly
+            julia-arch: x64
+            os: ubuntu-latest
+            experimental: true
+        # 32-bit Julia binaries are not available on macOS
         exclude:
           - os: macOS-latest
             julia-arch: x86
-          - julia-arch: x86
 
     steps:
-      - uses: actions/checkout@v1.0.0
-      - uses: julia-actions/setup-julia@latest
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: "Set up Julia"
+        uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.julia-version }}
-      - uses: julia-actions/julia-runtest@master
+          arch: ${{ matrix.julia-arch }}
+      - name: Run Tests
+        uses: julia-actions/julia-runtest@v1
