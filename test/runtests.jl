@@ -37,7 +37,7 @@ using ArtifactHelpers
     @testset "Building" begin
         @test_nowarn build_artifact!(artifacts_toml, File("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes"), force = true, verbose = false)#TODO: host or find reasonable download.
 
-        @test_nowarn build_artifact!(artifacts_toml, Zip("http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip"), force = true, verbose = false) #TODO: host or find reasonable download.
+        @test_nowarn build_artifact!(artifacts_toml, Zip("https://github.com/usadellab/Trimmomatic/files/5854859/Trimmomatic-0.39.zip"), force = true, verbose = false) #TODO: host or find reasonable download.
 
         @test_nowarn build_artifact!(artifacts_toml, AutoDownloadable("http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/chromAgp.tar.gz"), force = true, verbose = false)#TODO: host or find reasonable download.
 
