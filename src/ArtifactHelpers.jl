@@ -3,12 +3,11 @@ module ArtifactHelpers
 using Pkg
 using Pkg.Artifacts
 using Pkg.PlatformEngines #Note: supplies unpack.
-
 using Pkg.BinaryPlatforms
+using SHA
+using Downloads: download
 
 using ZipFile
-
-using SHA
 
 import Base: SHA1
 
@@ -22,6 +21,7 @@ TYPES = []
 
 function __init__()
     global TYPES = [(autodownloadable, AutoDownloadableEntry), (iszip, Zip), (downloadable, File), (islocal, Processed) ] #Note: order is relevant.
+    @static isdefined(PlatformEngines, :probe_platform_engines!) && probe_platform_engines!()
 end
 
 abstract type Entry end
@@ -192,13 +192,11 @@ function isverifiable(url::String)
 end
 
 function _download(url::AbstractString, dest::AbstractString; verbose::Bool = false)
-    Pkg.PlatformEngines.probe_platform_engines!()
-    return Pkg.PlatformEngines.download(url, dest, verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
+    return download(url, dest; verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
 end
 
 function _download(url::AbstractString, dest::AbstractString, tarball_hash; verbose::Bool = false)
-    Pkg.PlatformEngines.probe_platform_engines!()
-    downloaded = Pkg.PlatformEngines.download(url, dest, verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
+    downloaded = _download(url, dest; verbose = verbose) #Note: throws an error if unsuccessfull, otherwise returns path.
 
     result = Pkg.PlatformEngines.verify(dest, tarball_hash, verbose = verbose)
 
