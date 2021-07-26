@@ -1,7 +1,7 @@
 name = "ArtifactHelpers"
 uuid = "e0475575-a628-4ffc-9325-343306da1553"
 authors = ["Ciarán O'Mara <Ciaran.OMara@utas.edu.au>"]
-version = "0.4.2"
+version = "0.4.3"
 
 [deps]
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
